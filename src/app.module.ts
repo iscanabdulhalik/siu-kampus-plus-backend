@@ -5,6 +5,7 @@ import { AnnouncementModule } from './announcement/announcement.module';
 import { BusModule } from './bus/bus-schedule.module';
 import { YemekModule } from './foodList/yemek.module';
 import { ScraperModule } from './universityPage/scraper.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -18,5 +19,6 @@ import { ScraperModule } from './universityPage/scraper.module';
     YemekModule,
     ScraperModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

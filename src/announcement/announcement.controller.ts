@@ -1,13 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
+// announcement.controller.ts
+import { Controller, Get, Param } from '@nestjs/common';
 import { AnnouncementService } from './announcement.service';
+import { DepartmentKeys } from './departments.config';
 
-@Controller('university')
+@Controller('announcement')
 export class AnnouncementController {
   constructor(private readonly announcementService: AnnouncementService) {}
 
-  @Get('announcement')
-  async getAnnouncements() {
-    const announcements = await this.announcementService.getAnnouncements();
-    return announcements;
+  @Get(':department')
+  async getAnnouncements(@Param('department') department: DepartmentKeys) {
+    return this.announcementService.getAnnouncements(department);
   }
 }

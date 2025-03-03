@@ -1,85 +1,318 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Siirt University Web Scraper API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive NestJS-based API for retrieving information from Siirt University's website and related services. This application provides easy access to academic staff information, announcements, bus schedules, and cafeteria menus.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📋 Features
 
-## Description
+- **Academic Staff Information**: Retrieve details about academic staff members for various departments
+- **Department Announcements**: Fetch the latest announcements from specific departments
+- **University Announcements**: Get general university-wide announcements
+- **Bus Schedules**: Access bus timetables for university routes (A1 and A2 lines)
+- **Cafeteria Menu**: View daily cafeteria menus with nutritional information
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🛠️ Technology Stack
 
-## Project setup
+- **Backend Framework**: [NestJS](https://nestjs.com/)
+- **HTTP Client**: [@nestjs/axios](https://www.npmjs.com/package/@nestjs/axios)
+- **HTML Parsing**:
+  - [jsdom](https://www.npmjs.com/package/jsdom)
+  - [cheerio](https://www.npmjs.com/package/cheerio)
+- **Reactive Programming**: [RxJS](https://rxjs.dev/)
 
-```bash
-$ npm install
-```
+## 🚀 Getting Started
 
-## Compile and run the project
+### Prerequisites
+
+- Node.js (v14 or later)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/your-username/siirt-university-api.git
+cd siirt-university-api
 ```
 
-## Run tests
+2. Install dependencies
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
+# or
+yarn install
 ```
 
-## Resources
+3. Start the development server
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+npm run start:dev
+# or
+yarn start:dev
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The API will be available at `http://localhost:3000`.
 
-## Support
+## 📚 API Documentation
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Academic Staff
 
-## Stay in touch
+Retrieve information about academic staff members from different departments.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+GET /academic-staff/:department
+```
 
-## License
+Parameters:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- `department`: The department key (see list of available departments below)
+
+Example response:
+
+```json
+[
+  {
+    "name": "Prof. Dr. John Doe",
+    "title": "Professor",
+    "branch": "Computer Science",
+    "email": "johndoe@siirt.edu.tr",
+    "phone": "+90 123 456 7890",
+    "detailPageUrl": "https://bilgisayar.siirt.edu.tr/staff/johndoe"
+  },
+  {
+    "name": "Assoc. Prof. Jane Smith",
+    "title": "Associate Professor",
+    "branch": "Software Engineering",
+    "email": "janesmith@siirt.edu.tr",
+    "phone": "+90 123 456 7891",
+    "detailPageUrl": "https://bilgisayar.siirt.edu.tr/staff/janesmith"
+  }
+]
+```
+
+### Department Announcements
+
+Get the latest announcements from a specific department.
+
+```
+GET /announcement/:department
+```
+
+Parameters:
+
+- `department`: The department key (see list of available departments below)
+
+Example response:
+
+```json
+[
+  {
+    "title": "Final Exam Schedule",
+    "url": "https://bilgisayar.siirt.edu.tr/duyuru/final-exam-schedule",
+    "content": "The final exam schedule for the Spring semester has been announced. Students are advised to check their exam dates and...",
+    "announcement_date": "15 Mayıs"
+  },
+  {
+    "title": "Summer Internship Opportunities",
+    "url": "https://bilgisayar.siirt.edu.tr/duyuru/summer-internship",
+    "content": "Several companies have opened summer internship positions for our students. Interested candidates should submit their...",
+    "announcement_date": "10 Mayıs"
+  }
+]
+```
+
+### University Announcements
+
+Retrieve general announcements from the university's main page.
+
+```
+GET /duyuru/uni
+```
+
+Example response:
+
+```json
+[
+  {
+    "link": "https://siirt.edu.tr/duyuru/graduation-ceremony",
+    "title": "2023-2024 Graduation Ceremony",
+    "content": [
+      "The graduation ceremony for the 2023-2024 academic year will be held on June 15th at the university sports center..."
+    ],
+    "announcement_date": "20 Mayıs"
+  }
+]
+```
+
+### Bus Schedules
+
+Access bus schedules for university routes.
+
+```
+GET /bus-schedule       # Get all routes
+GET /bus-schedule/a1    # Get only A1 route
+GET /bus-schedule/a2    # Get only A2 route
+```
+
+Example response:
+
+```json
+{
+  "a1-universite-hatti": [
+    {
+      "carsKalkisSaati": "07:30",
+      "universiteKalkis": "08:30"
+    },
+    {
+      "carsKalkisSaati": "08:30",
+      "universiteKalkis": "09:30"
+    }
+  ],
+  "a-2-universite-hatti": [
+    {
+      "carsKalkisSaati": "07:45",
+      "universiteKalkis": "08:45"
+    },
+    {
+      "carsKalkisSaati": "08:45",
+      "universiteKalkis": "09:45"
+    }
+  ]
+}
+```
+
+### Cafeteria Menu
+
+View the daily cafeteria menus.
+
+```
+GET /yemek
+```
+
+Example response:
+
+```json
+[
+  {
+    "gun": "Bugün",
+    "tarih": "4 Mart Pazartesi",
+    "menu": [
+      {
+        "ad": "Mercimek Çorbası",
+        "kalori": 120
+      },
+      {
+        "ad": "Etli Nohut",
+        "kalori": 320
+      },
+      {
+        "ad": "Pirinç Pilavı",
+        "kalori": 220
+      },
+      {
+        "ad": "Salata",
+        "kalori": 80
+      }
+    ]
+  },
+  {
+    "gun": "Yarın",
+    "tarih": "5 Mart Salı",
+    "menu": [
+      {
+        "ad": "Ezogelin Çorbası",
+        "kalori": 110
+      },
+      {
+        "ad": "Tavuk Sote",
+        "kalori": 280
+      },
+      {
+        "ad": "Bulgur Pilavı",
+        "kalori": 200
+      },
+      {
+        "ad": "Yoğurt",
+        "kalori": 100
+      }
+    ]
+  }
+]
+```
+
+## 📝 Available Departments
+
+The following department keys can be used with the API:
+
+- `siirtUniversitesi`: Main university page
+- `bilgisayarMuhendisligi`: Computer Engineering
+- `elektrikElektronikMuhendisligi`: Electrical and Electronics Engineering
+- `gidaMuhendisligi`: Food Engineering
+- `insaatMuhendisligi`: Civil Engineering
+- `kimyaMuhendisligi`: Chemical Engineering
+- `makineMuhendisligi`: Mechanical Engineering
+- `egitimBilimleri`: Educational Sciences
+- `matematikVeFenBilimleri`: Mathematics and Science Education
+- `temelEgitim`: Basic Education
+- `turkceVeSosyalBilimlerEgitimi`: Turkish and Social Sciences Education
+- `yabanciDillerEgitimi`: Foreign Languages Education
+- `biyoloji`: Biology
+- `cografya`: Geography
+- `kimya`: Chemistry
+- `matematik`: Mathematics
+- `sosyoloji`: Sociology
+- `psikoloji`: Psychology
+- `tarih`: History
+- `turkDiliVeEdebiyati`: Turkish Language and Literature
+- `mutercimTercumanlik`: Translation and Interpretation
+
+## 📁 Project Structure
+
+```
+src/
+├── academic-staff/
+│   ├── academic-staff.controller.ts
+│   ├── academic-staff.module.ts
+│   └── academic-staff.service.ts
+├── announcement/
+│   ├── announcement.controller.ts
+│   ├── announcement.module.ts
+│   ├── announcement.service.ts
+│   └── departments.config.ts
+├── bus-schedule/
+│   ├── bus-schedule.controller.ts
+│   ├── bus-schedule.module.ts
+│   └── bus-schedule.service.ts
+├── scraper/
+│   ├── scraper.controller.ts
+│   ├── scraper.module.ts
+│   └── scraper.service.ts
+├── yemek/
+│   ├── yemek.controller.ts
+│   ├── yemek.module.ts
+│   └── yemek.service.ts
+└── app.module.ts
+```
+
+## 📈 Future Improvements
+
+- Add caching to reduce the number of requests to the university website
+- Implement authentication for secure API access
+- Add more comprehensive error handling
+- Create a web interface for easier access to the API
+- Add rate limiting to prevent abuse
+- Extend to additional university services
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/your-username/siirt-university-api/issues).
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgements
+
+- [Siirt University](https://siirt.edu.tr/) for providing the source data
+- [NestJS](https://nestjs.com/) for the excellent framework
+- All contributors and maintainers

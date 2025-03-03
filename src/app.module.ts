@@ -1,21 +1,22 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AnnouncementModule } from './announcement/announcement.module';
-import { ScraperModule } from './universityPage/scraper.module';
-import { YemekModule } from './foodList/yemek.module';
+import { HttpModule } from '@nestjs/axios';
 import { AcademicStaffModule } from './academicStaff/academic-staff.module';
+import { AnnouncementModule } from './announcement/announcement.module';
 import { BusModule } from './bus/bus-schedule.module';
+import { YemekModule } from './foodList/yemek.module';
+import { ScraperModule } from './universityPage/scraper.module';
 
 @Module({
   imports: [
-    AnnouncementModule,
-    ScraperModule,
-    YemekModule,
+    HttpModule.register({
+      timeout: 10000, // 10 saniye
+      maxRedirects: 5,
+    }),
     AcademicStaffModule,
+    AnnouncementModule,
     BusModule,
+    YemekModule,
+    ScraperModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

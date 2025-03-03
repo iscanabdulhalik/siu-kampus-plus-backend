@@ -1,15 +1,21 @@
-// app.controller.ts dosyasında (yoksa oluşturun)
+// app.controller.ts
 import { Controller, Get } from '@nestjs/common';
 
 @Controller()
 export class AppController {
   @Get()
-  getHello() {
-    return { message: 'Siirt University API is running' };
+  getIndex() {
+    return {
+      name: 'Siirt University API',
+      version: '1.0.0',
+      status: 'running',
+    };
   }
 
   @Get('health')
-  healthCheck() {
-    return { status: 'ok' };
+  health() {
+    return {
+      status: 'ok',
+    };
   }
 }

@@ -9,7 +9,7 @@ import { ScraperModule } from './universityPage/scraper.module';
 @Module({
   imports: [
     HttpModule.register({
-      timeout: 10000, // 10 saniye
+      timeout: 5000, // 10 saniye
       maxRedirects: 5,
     }),
     AcademicStaffModule,

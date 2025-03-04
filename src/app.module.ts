@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { AcademicStaffModule } from './academicStaff/academic-staff.module';
 import { AnnouncementModule } from './announcement/announcement.module';
@@ -6,9 +6,13 @@ import { BusModule } from './bus/bus-schedule.module';
 import { YemekModule } from './foodList/yemek.module';
 import { ScraperModule } from './universityPage/scraper.module';
 import { AppController } from './app.controller';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     HttpModule.register({
       timeout: 5000, // 10 saniye
       maxRedirects: 5,

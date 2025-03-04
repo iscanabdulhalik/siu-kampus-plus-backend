@@ -16,7 +16,7 @@ export interface YemekMenu {
 @Injectable()
 export class YemekService {
   private readonly logger = new Logger(YemekService.name);
-  private readonly targetUrl = 'https://siirt.edu.tr/yemeklistesi.html'; // Hedef sitenin URL'sini buraya ekleyin
+  private readonly targetUrl = 'https://siirt.edu.tr/yemeklistesi.html';
 
   async getYemekListesi(): Promise<YemekMenu[]> {
     try {
@@ -32,7 +32,7 @@ export class YemekService {
         return [];
       }
 
-      // Tüm ilk seviye divleri al (genellikle bunlar gün başlıklarıdır)
+      // Tüm ilk seviye divleri al (günlük menu blokları)
       const gunDivleri = Array.from(anaDiv.children).filter(
         (el) =>
           el.tagName === 'DIV' &&
@@ -40,24 +40,46 @@ export class YemekService {
           el.getAttribute('style')?.includes('border-bottom'),
       );
 
-      // Sadece ilk 3 günü al (bugün, yarın, sonraki gün)
-      const ilkUcGun = gunDivleri.slice(0, 3);
+      // Bugünü (sarı etiketli div) bul
+      const bugunIndex = gunDivleri.findIndex((div) => {
+        const ilkDiv = div.querySelector('div');
+        return (
+          ilkDiv &&
+          ilkDiv.hasAttribute('style') &&
+          ilkDiv.getAttribute('style')?.includes('background-color:#ecc41a')
+        );
+      });
 
+      if (bugunIndex === -1) {
+        this.logger.error('Bugünü belirten sarı etiketli div bulunamadı');
+        return [];
+      }
+
+      // Üç gün için menü verilerini hazırla
       const gunIsimleri = ['Bugün', 'Yarın', 'Sonraki Gün'];
       const yemekMenuleri: YemekMenu[] = [];
 
-      // Her bir gün div'i için
-      ilkUcGun.forEach((gunDiv, index) => {
-        // Her bir günün içindeki divleri al
+      // Bugün ve sonraki iki gün için verileri ekle
+      for (let i = 0; i < 3; i++) {
+        const currentIndex = bugunIndex + i;
+
+        // Eğer günler mevcut değilse, hata mesajı döndür
+        if (currentIndex >= gunDivleri.length) {
+          this.logger.error(`${gunIsimleri[i]} için yemek verisi bulunamadı`);
+          return yemekMenuleri.length > 0 ? yemekMenuleri : [];
+        }
+
+        const gunDiv = gunDivleri[currentIndex];
         const icDivler = Array.from(gunDiv.querySelectorAll('div'));
 
-        // İlk div genelde tarih/gün bilgisidir
+        // Gün/tarih bilgisini al
         const tarihDiv = icDivler[0];
         const tarih = tarihDiv ? tarihDiv.textContent?.trim() || '' : '';
 
-        // Diğer divler menü öğeleridir
+        // Menü öğelerini al
         const menuItems: YemekItem[] = [];
 
+        // İlk div'i atla (tarih bilgisi) ve diğerlerini işle
         icDivler.slice(1).forEach((div) => {
           const text = div.textContent?.trim();
           if (text) {
@@ -82,18 +104,9 @@ export class YemekService {
         });
 
         yemekMenuleri.push({
-          gun: gunIsimleri[index],
+          gun: gunIsimleri[i],
           tarih: tarih,
           menu: menuItems,
-        });
-      });
-
-      // Eğer 3 günden az bulunduysa, kalan günleri boş olarak ekle
-      for (let i = yemekMenuleri.length; i < 3; i++) {
-        yemekMenuleri.push({
-          gun: gunIsimleri[i],
-          tarih: '',
-          menu: [],
         });
       }
 

@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv';
 
 async function bootstrap() {
   try {
-    // Load .env file
+    // .env dosyasını yükle
     dotenv.config();
 
     // Başlangıç bilgilerini logla
@@ -13,26 +13,26 @@ async function bootstrap() {
       `Starting application in ${process.env.NODE_ENV || 'development'} environment`,
     );
     Logger.log(`Current directory: ${process.cwd()}`);
+    Logger.log(`PORT: ${process.env.PORT || '3000'}`);
 
-    // Create NestJS application with verbose logging
+    // NestJS uygulamasını oluştur
     const app = await NestFactory.create(AppModule, {
-      logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+      logger: ['error', 'warn', 'log', 'debug'],
     });
 
-    // Enable CORS
+    // CORS'u etkinleştir
     app.enableCors();
 
-    // Log incoming requests
+    // Gelen istekleri logla
     app.use((req, res, next) => {
       Logger.log(`Incoming request: ${req.method} ${req.url}`);
       next();
     });
 
-    // Auth middleware (health check hariç)
+    // Health check için auth bypass
     app.use((req, res, next) => {
-      // Health check için auth bypass
       if (req.url === '/health') {
-        Logger.log('Health check request received, bypassing auth');
+        Logger.log('Health check request received');
         return next();
       }
 
@@ -54,12 +54,8 @@ async function bootstrap() {
       next();
     });
 
-    // Railway tarafından otomatik olarak atanan PORT değişkenini kullan
-    // veya varsayılan olarak 3000 portunu kullan
-    // ÖNEMLİ: 5432 portunu kullanmaktan kaçın (PostgreSQL)
-    const port = parseInt(process.env.PORT || '3000', 10);
-
-    Logger.log(`Attempting to start application on port: ${port}`);
+    // Railway tarafından atanan portu kullan
+    const port = process.env.PORT || 3000;
     await app.listen(port, '0.0.0.0');
     Logger.log(`Application is running on port: ${port}`);
     Logger.log(

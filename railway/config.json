@@ -7,9 +7,9 @@
     "startCommand": "node server.js",
     "healthcheck": {
       "path": "/health",
-      "interval": 15,
-      "timeout": 10,
-      "grace_period": 120
+      "interval": 20,
+      "timeout": 15,
+      "grace_period": 180
     }
   }
 }

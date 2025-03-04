@@ -14,6 +14,7 @@ async function bootstrap() {
     );
     Logger.log(`Current directory: ${process.cwd()}`);
     Logger.log(`PORT: ${process.env.PORT || '3000'}`);
+    Logger.log(`SECRET_KEY set: ${process.env.SECRET_KEY ? 'YES' : 'NO'}`); // Ekleyin - SECRET_KEY tanımlı mı?
 
     // NestJS uygulamasını oluştur
     const app = await NestFactory.create(AppModule, {
@@ -26,6 +27,12 @@ async function bootstrap() {
     // Gelen istekleri logla
     app.use((req, res, next) => {
       Logger.log(`Incoming request: ${req.method} ${req.url}`);
+
+      // Header bilgilerini logla (değeri göstermeden)
+      Logger.log(
+        `Authorization header present: ${req.headers['authorization'] ? 'YES' : 'NO'}`,
+      );
+
       next();
     });
 
@@ -37,17 +44,42 @@ async function bootstrap() {
       }
 
       const secretKey = process.env.SECRET_KEY;
-      const authHeader = req.headers['authorization'];
+      let authHeader = req.headers['authorization'];
 
       if (!secretKey) {
         Logger.warn('SECRET_KEY environment variable is not set!');
+        return res.status(500).json({
+          statusCode: 500,
+          message: 'Server configuration error - contact administrator',
+        });
       }
 
-      if (!authHeader || authHeader !== secretKey) {
+      // Authorization header format kontrolü ve düzeltme
+      if (!authHeader) {
+        Logger.warn(`Missing authorization header: ${req.url}`);
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Unauthorized access - missing auth header',
+        });
+      }
+
+      // Bearer token formatını temizle
+      if (authHeader.startsWith('Bearer ')) {
+        authHeader = authHeader.slice(7);
+      }
+
+      // Değerleri logla (sadece geliştirme aşamasında kullanın, production'da kaldırın)
+      if (process.env.NODE_ENV !== 'production') {
+        Logger.log(
+          `Auth check: ${authHeader === secretKey ? 'MATCH' : 'NO MATCH'}`,
+        );
+      }
+
+      if (authHeader !== secretKey) {
         Logger.warn(`Unauthorized access attempt: ${req.url}`);
         return res.status(401).json({
           statusCode: 401,
-          message: 'Unauthorized access',
+          message: 'Unauthorized access - invalid credentials',
         });
       }
 

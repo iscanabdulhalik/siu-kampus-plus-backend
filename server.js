@@ -3,16 +3,11 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-console.log('Starting server via server.js entrypoint');
-console.log(`Current working directory: ${process.cwd()}`);
-
 // Railway için port'u sabit 8080 olarak ayarla
 process.env.PORT = '8080';
-console.log(`Setting PORT environment variable to: ${process.env.PORT}`);
 
 // NestJS uygulamasını ayrı bir process olarak başlat
 const mainJsPath = path.join(process.cwd(), 'dist/main.js');
-console.log(`Attempting to start NestJS application at: ${mainJsPath}`);
 
 // Process başlatma seçeneklerini ayarla
 const childProcess = spawn('node', [mainJsPath], {
@@ -28,19 +23,14 @@ childProcess.on('error', (error) => {
 
 // Exit sinyalini bekle
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
   childProcess.kill('SIGTERM');
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
   childProcess.kill('SIGINT');
 });
 
 // Child process'in çıkışını dinle
 childProcess.on('exit', (code, signal) => {
-  console.log(
-    `NestJS application exited with code ${code} and signal ${signal}`,
-  );
   process.exit(code || 0);
 });

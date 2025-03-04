@@ -10,10 +10,17 @@ async function bootstrap() {
 
     const app = await NestFactory.create(AppModule);
 
+    // CORS'u etkinleştir
+    app.enableCors();
+
     // Global middleware ekleyerek tüm routelar için SECRET_KEY kontrolü yap
     app.use((req, res, next) => {
       const secretKey = process.env.SECRET_KEY;
       const authHeader = req.headers['authorization'];
+
+      if (!secretKey) {
+        Logger.warn('SECRET_KEY environment variable is not set!');
+      }
 
       if (!authHeader || authHeader !== secretKey) {
         return res.status(401).json({
@@ -25,8 +32,16 @@ async function bootstrap() {
       next();
     });
 
-    await app.listen(3000);
-    Logger.log(`Application is running on port: 3000`);
+    // Railway tarafından sağlanan PORT değişkenini kullan
+    const port = process.env.PORT || 3000;
+
+    // Health check endpoint ekle
+    app.use('/health', (req, res) => {
+      res.status(200).send('OK');
+    });
+
+    await app.listen(port);
+    Logger.log(`Application is running on port: ${port}`);
   } catch (error) {
     Logger.error(`Failed to start application: ${error.message}`, error.stack);
     process.exit(1);

@@ -7,6 +7,7 @@ import { YemekModule } from './foodList/yemek.module';
 import { ScraperModule } from './universityPage/scraper.module';
 import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
     }),
     HttpModule.register({
-      timeout: 5000, // 10 saniye
+      timeout: 10000, // 10 saniye
       maxRedirects: 5,
     }),
     AcademicStaffModule,
@@ -23,6 +24,6 @@ import { ConfigModule } from '@nestjs/config';
     YemekModule,
     ScraperModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
 })
 export class AppModule {}

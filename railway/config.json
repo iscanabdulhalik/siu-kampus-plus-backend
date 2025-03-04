@@ -7,7 +7,11 @@
     "startCommand": "npm run start:prod",
     "healthcheck": {
       "path": "/health",
-      "timeout": 100
-    }
+      "interval": 15,
+      "timeout": 60,
+      "grace_period": 30
+    },
+    "restartPolicyType": "on_failure",
+    "restartPolicyMaxRetries": 3
   }
 }

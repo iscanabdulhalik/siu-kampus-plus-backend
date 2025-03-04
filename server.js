@@ -1,11 +1,20 @@
-// Improved server.js with explicit health check
+// Improved server.js with port conflict handling
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
 console.log('Starting server via server.js entrypoint');
 console.log(`Current working directory: ${process.cwd()}`);
-console.log(`PORT environment variable: ${process.env.PORT || 3000}`);
+
+// Get the PORT from environment, ensure it's not 5432
+let port = parseInt(process.env.PORT || '3000', 10);
+if (port === 5432) {
+  console.warn('WARNING: PORT was set to 5432 which is used by PostgreSQL.');
+  console.warn('Switching to port 3000 to avoid conflict.');
+  port = 3000;
+}
+
+console.log(`Using port: ${port}`);
 
 // Check if dist/main.js exists
 const mainJsPath = path.join(process.cwd(), 'dist/main.js');
@@ -36,6 +45,7 @@ app.get('/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     message: 'Health check from standalone express server',
+    port: port,
   });
 });
 
@@ -45,8 +55,10 @@ app.use('*', (req, res, next) => {
   next();
 });
 
+// Override process.env.PORT for the NestJS application
+process.env.PORT = port.toString();
+
 // Start the Express server
-const port = process.env.PORT || 3000;
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Express server listening on port ${port}`);
 
@@ -56,7 +68,7 @@ const server = app.listen(port, '0.0.0.0', () => {
     require('./dist/main');
   } catch (error) {
     console.error('Failed to load NestJS application:', error);
-    // Keep Express server running for health checks
+    console.log('Express server will remain running for health checks');
   }
 });
 

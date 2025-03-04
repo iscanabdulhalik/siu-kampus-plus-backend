@@ -5,7 +5,10 @@ const path = require('path');
 
 console.log('Starting server via server.js entrypoint');
 console.log(`Current working directory: ${process.cwd()}`);
-console.log(`PORT: ${process.env.PORT || '3000'}`);
+
+// Railway için port'u sabit 8080 olarak ayarla
+process.env.PORT = '8080';
+console.log(`Setting PORT environment variable to: ${process.env.PORT}`);
 
 // NestJS uygulamasını ayrı bir process olarak başlat
 const mainJsPath = path.join(process.cwd(), 'dist/main.js');

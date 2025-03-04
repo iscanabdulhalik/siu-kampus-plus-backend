@@ -55,7 +55,8 @@ async function bootstrap() {
     });
 
     // Railway tarafından atanan portu kullan
-    const port = process.env.PORT || 3000;
+    const port = parseInt(process.env.PORT || '8080', 10);
+    Logger.log(`Trying to start application on port: ${port}`);
     await app.listen(port, '0.0.0.0');
     Logger.log(`Application is running on port: ${port}`);
     Logger.log(

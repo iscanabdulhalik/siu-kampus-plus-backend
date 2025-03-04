@@ -1,16 +1,14 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
-import * as dotenv from 'dotenv';
+// This file is required for deployment and should match what's expected in config.json
+const dotenv = require('dotenv');
+dotenv.config();
+const { NestFactory } = require('@nestjs/core');
+const { Logger } = require('@nestjs/common');
+const { AppModule } = require('./dist/app.module');
 
 async function bootstrap() {
   try {
-    // Load .env file
-    dotenv.config();
+    Logger.log('Server starting...');
 
-    Logger.log('Application starting...');
-
-    // Create NestJS application
     const app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn', 'log'],
     });
@@ -18,14 +16,8 @@ async function bootstrap() {
     // Enable CORS
     app.enableCors();
 
-    // Set global prefix for all routes except health check
-    // app.setGlobalPrefix('api', {
-    //   exclude: ['/health'],
-    // });
-
-    // NestJS middleware for authentication
+    // Auth middleware (bypass for health check)
     app.use((req, res, next) => {
-      // Auth bypass for health check
       if (req.url === '/health') {
         return next();
       }
@@ -47,27 +39,26 @@ async function bootstrap() {
       next();
     });
 
-    // Start NestJS application on the main port from config
     const port = process.env.PORT || 3000;
     await app.listen(port, '0.0.0.0');
-    Logger.log(`Application is running on port: ${port}`);
+    Logger.log(`Server is running on port: ${port}`);
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
       Logger.log('SIGTERM received, shutting down gracefully');
       app.close().then(() => {
-        Logger.log('Application closed');
+        Logger.log('Server closed');
       });
     });
 
     process.on('SIGINT', () => {
       Logger.log('SIGINT received, shutting down gracefully');
       app.close().then(() => {
-        Logger.log('Application closed');
+        Logger.log('Server closed');
       });
     });
   } catch (error) {
-    Logger.error(`Failed to start application: ${error.message}`);
+    Logger.error(`Failed to start server: ${error.message}`);
     Logger.error(`Stack trace: ${error.stack}`);
     process.exit(1);
   }

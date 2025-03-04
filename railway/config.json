@@ -1,15 +1,15 @@
 {
   "build": {
     "builder": "nixpacks",
-    "buildCommand": "npm install && npm run build"
+    "buildCommand": "npm ci && npm run build"
   },
   "deploy": {
     "startCommand": "node server.js",
     "healthcheck": {
       "path": "/health",
-      "interval": 10,
-      "timeout": 5,
-      "grace_period": 60
+      "interval": 15,
+      "timeout": 10,
+      "grace_period": 120
     }
   }
 }

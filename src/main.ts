@@ -8,25 +8,32 @@ async function bootstrap() {
     // Load .env file
     dotenv.config();
 
-    Logger.log('Application starting...');
+    // Başlangıç bilgilerini logla
+    Logger.log(
+      `Starting application in ${process.env.NODE_ENV || 'development'} environment`,
+    );
+    Logger.log(`Current directory: ${process.cwd()}`);
+    Logger.log(`PORT: ${process.env.PORT || 3000}`);
 
-    // Create NestJS application
+    // Create NestJS application with verbose logging
     const app = await NestFactory.create(AppModule, {
-      logger: ['error', 'warn', 'log'],
+      logger: ['error', 'warn', 'log', 'debug', 'verbose'],
     });
 
     // Enable CORS
     app.enableCors();
 
-    // Set global prefix for all routes except health check
-    // app.setGlobalPrefix('api', {
-    //   exclude: ['/health'],
-    // });
-
-    // NestJS middleware for authentication
+    // Log incoming requests (debugging için)
     app.use((req, res, next) => {
-      // Auth bypass for health check
+      Logger.log(`Incoming request: ${req.method} ${req.url}`);
+      next();
+    });
+
+    // Auth middleware (health check hariç)
+    app.use((req, res, next) => {
+      // Health check için auth bypass
       if (req.url === '/health') {
+        Logger.log('Health check request received, bypassing auth');
         return next();
       }
 
@@ -38,6 +45,7 @@ async function bootstrap() {
       }
 
       if (!authHeader || authHeader !== secretKey) {
+        Logger.warn(`Unauthorized access attempt: ${req.url}`);
         return res.status(401).json({
           statusCode: 401,
           message: 'Unauthorized access',
@@ -47,10 +55,13 @@ async function bootstrap() {
       next();
     });
 
-    // Start NestJS application on the main port from config
+    // Start NestJS application
     const port = process.env.PORT || 3000;
     await app.listen(port, '0.0.0.0');
     Logger.log(`Application is running on port: ${port}`);
+    Logger.log(
+      `Health check should be available at: http://localhost:${port}/health`,
+    );
 
     // Graceful shutdown
     process.on('SIGTERM', () => {

@@ -5,30 +5,30 @@ import * as dotenv from 'dotenv';
 
 async function bootstrap() {
   try {
-    // .env dosyasını yükle
+    // Load .env file
     dotenv.config();
 
-    // Başlangıç bilgilerini logla
+    // Log startup information
     Logger.log(
       `Starting application in ${process.env.NODE_ENV || 'development'} environment`,
     );
     Logger.log(`Current directory: ${process.cwd()}`);
     Logger.log(`PORT: ${process.env.PORT || '3000'}`);
-    Logger.log(`SECRET_KEY set: ${process.env.SECRET_KEY ? 'YES' : 'NO'}`); // Ekleyin - SECRET_KEY tanımlı mı?
+    Logger.log(`SECRET_KEY set: ${process.env.SECRET_KEY ? 'YES' : 'NO'}`);
 
-    // NestJS uygulamasını oluştur
+    // Create NestJS application
     const app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn', 'log', 'debug'],
     });
 
-    // CORS'u etkinleştir
+    // Enable CORS
     app.enableCors();
 
-    // Gelen istekleri logla
+    // Log incoming requests
     app.use((req, res, next) => {
       Logger.log(`Incoming request: ${req.method} ${req.url}`);
 
-      // Header bilgilerini logla (değeri göstermeden)
+      // Log header information (without showing value)
       Logger.log(
         `Authorization header present: ${req.headers['authorization'] ? 'YES' : 'NO'}`,
       );
@@ -36,7 +36,7 @@ async function bootstrap() {
       next();
     });
 
-    // Health check için auth bypass
+    // Authorization middleware with health check bypass
     app.use((req, res, next) => {
       if (req.url === '/health') {
         Logger.log('Health check request received');
@@ -54,7 +54,7 @@ async function bootstrap() {
         });
       }
 
-      // Authorization header format kontrolü ve düzeltme
+      // Check for missing authorization header
       if (!authHeader) {
         Logger.warn(`Missing authorization header: ${req.url}`);
         return res.status(401).json({
@@ -63,12 +63,12 @@ async function bootstrap() {
         });
       }
 
-      // Bearer token formatını temizle
+      // Clean Bearer token format
       if (authHeader.startsWith('Bearer ')) {
         authHeader = authHeader.slice(7);
       }
 
-      // Değerleri logla (sadece geliştirme aşamasında kullanın, production'da kaldırın)
+      // Log values (only in development, remove in production)
       if (process.env.NODE_ENV !== 'production') {
         Logger.log(
           `Auth check: ${authHeader === secretKey ? 'MATCH' : 'NO MATCH'}`,
@@ -86,7 +86,7 @@ async function bootstrap() {
       next();
     });
 
-    // Railway tarafından atanan portu kullan
+    // Use port assigned by Railway
     const port = parseInt(process.env.PORT || '8080', 10);
     Logger.log(`Trying to start application on port: ${port}`);
     await app.listen(port, '0.0.0.0');

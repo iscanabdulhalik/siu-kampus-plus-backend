@@ -1,4 +1,5 @@
 export const DEPARTMENT_URLS = {
+  //mühendislik ve eğitim var şu an sadece
   siirtUniversitesi: 'https://siirt.edu.tr/',
   bilgisayarMuhendisligi: 'https://bilgisayar.siirt.edu.tr/',
   elektrikElektronikMuhendisligi: 'https://eem.siirt.edu.tr/',

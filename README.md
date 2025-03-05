@@ -1,12 +1,14 @@
 # Siirt University Web Scraper API
 
-A comprehensive NestJS-based API for retrieving information from Siirt University's website and related services. This application provides easy access to academic staff information, announcements, bus schedules, and cafeteria menus.
+A comprehensive NestJS-based API for retrieving information from Siirt University's website and related services. This application provides easy access to academic staff information, announcements, events, news, bus schedules, and cafeteria menus.
 
 ## 📋 Features
 
 - **Academic Staff Information**: Retrieve details about academic staff members for various departments
 - **Department Announcements**: Fetch the latest announcements from specific departments
 - **University Announcements**: Get general university-wide announcements
+- **University Events**: Access upcoming events from the events calendar
+- **University News**: Get the latest news articles with details
 - **Bus Schedules**: Access bus timetables for university routes (A1 and A2 lines)
 - **Cafeteria Menu**: View daily cafeteria menus with nutritional information
 
@@ -140,6 +142,64 @@ Example response:
       "The graduation ceremony for the 2023-2024 academic year will be held on June 15th at the university sports center..."
     ],
     "announcement_date": "20 Mayıs"
+  }
+]
+```
+
+### University Events
+
+Access upcoming events from the university's events calendar.
+
+```
+GET /duyuru/events
+```
+
+Parameters:
+
+- `url` (optional): Custom URL to scrape (defaults to https://siirt.edu.tr/etkinliktakvimi.html)
+
+Example response:
+
+```json
+[
+  {
+    "link": "https://siirt.edu.tr/event/academic-conference",
+    "date": "15.05.2024"
+  },
+  {
+    "link": "https://siirt.edu.tr/event/cultural-festival",
+    "date": "20.04.2024"
+  }
+]
+```
+
+### University News
+
+Get the latest news articles from the university's website.
+
+```
+GET /duyuru/news
+```
+
+Parameters:
+
+- `url` (optional): Custom URL to scrape (defaults to https://siirt.edu.tr/)
+
+Example response:
+
+```json
+[
+  {
+    "link": "https://siirt.edu.tr/news/university-ranking",
+    "title": "Siirt University Ranks Among Top 50",
+    "img_url": "https://siirt.edu.tr/images/news/ranking.jpg",
+    "content": "Siirt University has been ranked among the top 50 universities in Turkey according to the latest academic performance index..."
+  },
+  {
+    "link": "https://siirt.edu.tr/news/research-grant",
+    "title": "University Receives Major Research Grant",
+    "img_url": "https://siirt.edu.tr/images/news/grant.jpg",
+    "content": "The Computer Engineering Department has been awarded a significant research grant to develop new AI applications..."
   }
 ]
 ```
@@ -294,14 +354,26 @@ src/
 └── app.module.ts
 ```
 
+## 🔐 Authentication
+
+The API is secured with a simple API key authentication method:
+
+1. Set your `SECRET_KEY` in the environment variables
+2. Include this key in the `Authorization` header with each request:
+   - As a Bearer token: `Authorization: Bearer your_secret_key_here`
+   - Or directly: `Authorization: your_secret_key_here`
+
+Note: The `/health` endpoint does not require authentication for monitoring purposes.
+
 ## 📈 Future Improvements
 
 - Add caching to reduce the number of requests to the university website
-- Implement authentication for secure API access
-- Add more comprehensive error handling
+- Implement more sophisticated authentication for secure API access
+- Add more comprehensive error handling and request validation
 - Create a web interface for easier access to the API
 - Add rate limiting to prevent abuse
-- Extend to additional university services
+- Extend API to cover additional university services
+- Improve data normalization and consistency across endpoints
 
 ## 🤝 Contributing
 

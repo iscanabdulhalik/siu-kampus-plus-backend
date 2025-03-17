@@ -3,8 +3,81 @@ import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 
+// Bellek yönetimi için yardımcı fonksiyon
+function logMemoryUsage() {
+  const memUsage = process.memoryUsage();
+  return {
+    rss: `${Math.round(memUsage.rss / 1024 / 1024)} MB`, // Resident Set Size
+    heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)} MB`, // V8 bellek tahsisi
+    heapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)} MB`, // Kullanılan V8 belleği
+    external: `${Math.round(memUsage.external / 1024 / 1024)} MB`, // C++ nesneleri belleği
+  };
+}
+
+// Global hata yakalama için yardımcı
+function setupGlobalErrorHandlers() {
+  process.on('uncaughtException', (error) => {
+    Logger.error(`Uncaught Exception: ${error.message}`, error.stack);
+    // Anında çıkış yapmayın, sadece log alın
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    Logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+    // Anında çıkış yapmayın, sadece log alın
+  });
+}
+
+// Bellek temizliğini zorlayan fonksiyon
+function forceGarbageCollection() {
+  if (global.gc) {
+    const beforeMemory = process.memoryUsage();
+    global.gc();
+    const afterMemory = process.memoryUsage();
+
+    Logger.log(
+      `Bellek temizliği yapıldı: Öncesi ${Math.round(beforeMemory.heapUsed / 1024 / 1024)}MB, Sonrası ${Math.round(afterMemory.heapUsed / 1024 / 1024)}MB`,
+    );
+  } else {
+    Logger.warn(
+      'Manuel çöp toplama kullanılamıyor. Node.js --expose-gc ile başlatılmadı.',
+    );
+  }
+}
+
+// Uygulama sonlandırma işleyicisi
+async function gracefulShutdown(app, signal) {
+  Logger.log(`${signal} sinyali alındı, uygulama kapatılıyor...`);
+
+  try {
+    // Bellek kullanımını logla
+    Logger.log(
+      `Kapatma sırasında bellek durumu: ${JSON.stringify(logMemoryUsage())}`,
+    );
+
+    // JSDOM nesnelerini temizlemeye çalış
+    if (global.gc) {
+      global.gc();
+      Logger.log('Çöp toplayıcı çalıştırıldı');
+    }
+
+    // Uygulama kapatma
+    await app.close();
+    Logger.log('Uygulama temiz bir şekilde kapatıldı');
+    process.exit(0);
+  } catch (error) {
+    Logger.error(`Uygulama kapatma hatası: ${error.message}`, error.stack);
+    process.exit(1);
+  }
+}
+
 async function bootstrap() {
   try {
+    // Başlangıç bellek durumunu logla
+    Logger.log(`Başlangıç bellek durumu: ${JSON.stringify(logMemoryUsage())}`);
+
+    // Global hata yakalayıcıları kur
+    setupGlobalErrorHandlers();
+
     // Load .env file
     dotenv.config();
 
@@ -19,6 +92,7 @@ async function bootstrap() {
     // Create NestJS application
     const app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn', 'log', 'debug'],
+      bodyParser: true, // Ensure bodyParser is enabled
     });
 
     // Enable CORS
@@ -26,20 +100,19 @@ async function bootstrap() {
 
     // Log incoming requests
     app.use((req, res, next) => {
-      Logger.log(`Incoming request: ${req.method} ${req.url}`);
-
-      // Log header information (without showing value)
-      Logger.log(
-        `Authorization header present: ${req.headers['authorization'] ? 'YES' : 'NO'}`,
-      );
-
+      // Sağlık kontrolleri için loglama eklemeyelim
+      if (req.url !== '/health') {
+        Logger.log(`Incoming request: ${req.method} ${req.url}`);
+        Logger.log(
+          `Authorization header present: ${req.headers['authorization'] ? 'YES' : 'NO'}`,
+        );
+      }
       next();
     });
 
     // Authorization middleware with health check bypass
     app.use((req, res, next) => {
       if (req.url === '/health') {
-        Logger.log('Health check request received');
         return next();
       }
 
@@ -68,13 +141,6 @@ async function bootstrap() {
         authHeader = authHeader.slice(7);
       }
 
-      // Log values (only in development, remove in production)
-      if (process.env.NODE_ENV !== 'production') {
-        Logger.log(
-          `Auth check: ${authHeader === secretKey ? 'MATCH' : 'NO MATCH'}`,
-        );
-      }
-
       if (authHeader !== secretKey) {
         Logger.warn(`Unauthorized access attempt: ${req.url}`);
         return res.status(401).json({
@@ -86,6 +152,26 @@ async function bootstrap() {
       next();
     });
 
+    // Periyodik çöp toplama zamanlaması kur
+    // Her 15 dakikada bir
+    // Not: Çöp toplama performans etkisi yapabilir
+    setInterval(
+      () => {
+        forceGarbageCollection();
+      },
+      15 * 60 * 1000,
+    );
+
+    // Bellek durumu raporlaması
+    setInterval(
+      () => {
+        Logger.log(
+          `Çalışma anı bellek durumu: ${JSON.stringify(logMemoryUsage())}`,
+        );
+      },
+      10 * 60 * 1000,
+    ); // Her 10 dakikada bir
+
     // Use port assigned by Railway
     const port = parseInt(process.env.PORT || '8080', 10);
     Logger.log(`Trying to start application on port: ${port}`);
@@ -96,19 +182,8 @@ async function bootstrap() {
     );
 
     // Graceful shutdown
-    process.on('SIGTERM', () => {
-      Logger.log('SIGTERM received, shutting down gracefully');
-      app.close().then(() => {
-        Logger.log('Application closed');
-      });
-    });
-
-    process.on('SIGINT', () => {
-      Logger.log('SIGINT received, shutting down gracefully');
-      app.close().then(() => {
-        Logger.log('Application closed');
-      });
-    });
+    process.on('SIGTERM', () => gracefulShutdown(app, 'SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown(app, 'SIGINT'));
   } catch (error) {
     Logger.error(`Failed to start application: ${error.message}`);
     Logger.error(`Stack trace: ${error.stack}`);

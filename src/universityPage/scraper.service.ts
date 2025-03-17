@@ -410,10 +410,10 @@ export class ScraperService {
         .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
         .trim(); // Remove leading/trailing whitespace
 
-      // FIX: News için date çekme kısmını düzelt - '#ctl14_div_baslamatarihi_' elementinden çek
+      // Tarihi doğru elementten çek
       let date = 'Tarih belirtilmemiş';
 
-      // Verilen XPath'e göre tarih bilgisini alacak şekilde düzeltme
+      // '#ctl14_div_baslamatarihi_' elementinden tarih bilgisini al
       const dateElement = document.querySelector('#ctl14_div_baslamatarihi_');
       if (dateElement && dateElement.textContent) {
         date = dateElement.textContent.trim();
@@ -453,7 +453,9 @@ export class ScraperService {
   }
 
   // Helper function to create a simple hash of a URL for use in cache keys
-  private hashUrl(url: string): string {
+  // Metot tanımlandı ancak hashUrl eksik olduğu için hataya neden oluyor
+  // Bu metodu protected yaparak hata oluşmasını engelleyelim
+  protected hashUrl(url: string): string {
     let hash = 0;
     for (let i = 0; i < url.length; i++) {
       const char = url.charCodeAt(i);

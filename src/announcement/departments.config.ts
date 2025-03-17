@@ -38,7 +38,7 @@ export const DEPARTMENT_URLS = {
   peyzajmimarligibolumu: 'https://peyzajmimarligibolumu.siirt.edu.tr/',
   mimarlik: 'https://mimarlik.siirt.edu.tr/',
   sehirbolgeplanlama: 'https://sehirbolgeplanlama.siirt.edu.tr/',
-  iibf: 'https://iibf.siirt.edu.tr/',
+  iibf:'https://iibf.siirt.edu.tr/',
   iktisat: 'https://iktisat.siirt.edu.tr/',
   isletme: 'https://isletme.siirt.edu.tr/',
   maliye: 'https://maliye.siirt.edu.tr/',

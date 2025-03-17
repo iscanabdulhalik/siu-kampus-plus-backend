@@ -53,9 +53,90 @@ npm run start:dev
 yarn start:dev
 ```
 
-The API will be available at `http://localhost:3000`.
+The API will be available at `http://localhost:8080`.
 
 ## 📚 API Documentation
+
+### Base API Information
+
+Retrieve information about all available endpoints.
+
+```
+GET /
+```
+
+Example response:
+
+```json
+{
+  "name": "Siirt University API",
+  "version": "1.0.0",
+  "description": "Siirt Üniversitesi veri çekme API'si",
+  "endpoints": [
+    {
+      "path": "/academic-staff/:department",
+      "description": "Akademik personel bilgilerini getirir"
+    },
+    {
+      "path": "/announcement/:department",
+      "description": "Bölüm duyurularını getirir"
+    },
+    {
+      "path": "/duyuru/uni",
+      "description": "Üniversite genel duyurularını getirir"
+    },
+    {
+      "path": "/bus-schedule",
+      "description": "Tüm otobüs saatlerini getirir"
+    },
+    {
+      "path": "/bus-schedule/a1",
+      "description": "A1 hattı otobüs saatlerini getirir"
+    },
+    {
+      "path": "/bus-schedule/a2",
+      "description": "A2 hattı otobüs saatlerini getirir"
+    },
+    {
+      "path": "/yemek",
+      "description": "Yemek listesini getirir"
+    },
+    {
+      "path": "/university/notices",
+      "description": "Üniversite duyurularını getirir"
+    },
+    {
+      "path": "/university/events",
+      "description": "Üniversite etkinliklerini getirir"
+    },
+    {
+      "path": "/university/news",
+      "description": "Üniversite haberlerini getirir"
+    },
+    {
+      "path": "/university/clear-cache",
+      "description": "Önbelleği temizler"
+    }
+  ]
+}
+```
+
+### Health Check
+
+Check if the API is operational.
+
+```
+GET /health
+```
+
+Example response:
+
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-03-18T12:34:56.789Z"
+}
+```
 
 ### Academic Staff
 
@@ -146,39 +227,33 @@ Example response:
 ]
 ```
 
-### University Events
+### University Notices
 
-Access upcoming events from the university's events calendar.
+Get university notices from the main website.
 
 ```
-GET /duyuru/events
+GET /university/notices
 ```
-
-Parameters:
-
-- `url` (optional): Custom URL to scrape (defaults to https://siirt.edu.tr/etkinliktakvimi.html)
 
 Example response:
 
 ```json
 [
   {
-    "link": "https://siirt.edu.tr/event/academic-conference",
-    "date": "15.05.2024"
-  },
-  {
-    "link": "https://siirt.edu.tr/event/cultural-festival",
-    "date": "20.04.2024"
+    "title": "Academic Calendar Updated",
+    "url": "https://siirt.edu.tr/notices/academic-calendar",
+    "date": "22.03.2025",
+    "content": "The academic calendar for the 2025-2026 academic year has been updated..."
   }
 ]
 ```
 
-### University News
+### University Events
 
-Get the latest news articles from the university's website.
+Access upcoming events from the university's events calendar.
 
 ```
-GET /duyuru/news
+GET /university/events
 ```
 
 Parameters:
@@ -190,18 +265,55 @@ Example response:
 ```json
 [
   {
-    "link": "https://siirt.edu.tr/news/university-ranking",
-    "title": "Siirt University Ranks Among Top 50",
-    "img_url": "https://siirt.edu.tr/images/news/ranking.jpg",
-    "content": "Siirt University has been ranked among the top 50 universities in Turkey according to the latest academic performance index..."
-  },
-  {
-    "link": "https://siirt.edu.tr/news/research-grant",
-    "title": "University Receives Major Research Grant",
-    "img_url": "https://siirt.edu.tr/images/news/grant.jpg",
-    "content": "The Computer Engineering Department has been awarded a significant research grant to develop new AI applications..."
+    "title": "International Conference on Engineering",
+    "date": "15.05.2025",
+    "url": "https://siirt.edu.tr/event/engineering-conference",
+    "location": "Main Campus Conference Hall"
   }
 ]
+```
+
+### University News
+
+Get the latest news articles from the university's website.
+
+```
+GET /university/news
+```
+
+Parameters:
+
+- `url` (optional): Custom URL to scrape (defaults to https://siirt.edu.tr/)
+
+Example response:
+
+```json
+[
+  {
+    "title": "Siirt University Ranks Among Top 50",
+    "url": "https://siirt.edu.tr/news/university-ranking",
+    "image": "https://siirt.edu.tr/images/news/ranking.jpg",
+    "date": "10.03.2025",
+    "content": "Siirt University has been ranked among the top 50 universities in Turkey according to the latest academic performance index..."
+  }
+]
+```
+
+### Clear Cache
+
+Clear the API's cache to fetch fresh data.
+
+```
+GET /university/clear-cache
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "Cache cleared successfully"
+}
 ```
 
 ### Bus Schedules
@@ -344,13 +456,15 @@ src/
 │   ├── bus-schedule.module.ts
 │   └── bus-schedule.service.ts
 ├── scraper/
-│   ├── scraper.controller.ts
+│   ├── interfaces/
+│   │   └── scraper.interfaces.ts
 │   ├── scraper.module.ts
 │   └── scraper.service.ts
 ├── yemek/
 │   ├── yemek.controller.ts
 │   ├── yemek.module.ts
 │   └── yemek.service.ts
+├── app.controller.ts
 └── app.module.ts
 ```
 
